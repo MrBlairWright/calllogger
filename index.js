@@ -8,10 +8,15 @@ var cheerio = require('cheerio');
 app.set('port', (process.env.PORT || 5000))
 app.use(express.static(__dirname + '/public'))
 
-//app.get('/', function(request, response) {
-  //response.send('Hello World!');
-//  response.send(cool());
-//});
+var htmlText;
+fs = require('fs')
+fs.readFile('example.html', 'utf8', function (err,data) {
+  if (err) {
+    return console.log(err);
+  }
+  //console.log(data);
+  htmlText = data;
+});
 
 app.get('/', function(request, response) {
   var result = ''
@@ -21,38 +26,45 @@ app.get('/', function(request, response) {
   response.send(result);
 });
 
+app.get('/example.html', function(request, response) {
+  //Simple call to get HTML if available.
+  response.send(htmlText);
+});
+
 app.get('/scrape', function(req, res){
     // The URL we will scrape from - in our example Anchorman 2.
 	url = 'http://192.168.1.105/index.htm';
 	//url = 'http://www.imdb.com/title/tt1229340/';
 
-    // The structure of our request call
-    // The first parameter is our URL
-    // The callback function takes 3 parameters, an error, response status code and the html
-
+  //Simple call to get HTML if available.
 	request(url, function(error, response, html){
-	if(error || response.statusCode != 200) return;
-
-        var $ = cheerio.load(html);
-        var a = [];
-
-//    $('td.normalText').each(function(i, element){
-    $('td.normalText').each(function(i, element){
-    	var a = $(this);
-    	
-		if(a.text() > "") {
-
-		//	if(a.text().trim() = "Dialed Numbers") {
-		//		console.log(i + "***");			
-		//	}
-
-			console.log(i + "[" + a.text().trim() + "]");
-		
-//		if(a.text() = "Dialed Numbers") {
-//			console.log(n + "***");			
-//		}
-		}
+	 if(error || response.statusCode != 200) return;
+    htmlText = html;
 	});
+
+  var $ = cheerio.load(htmlText);
+
+
+  console.log("loaded html text into Cheerio");
+
+  var a = [];
+  //    $('td.normalText').each(function(i, element){
+  $('td.normalText').each(function(i, element){
+  var a = $(this);
+
+  if(a.text() > "") {
+
+  //  if(a.text().trim() = "Dialed Numbers") {
+  //    console.log(i + "***");     
+  //  }
+
+  console.log(i + "[" + a.text().trim() + "]");
+
+  //    if(a.text() = "Dialed Numbers") {
+  //      console.log(n + "***");     
+  //    }
+}
+
 	});
 });
 
